@@ -1,0 +1,113 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <h1>Welcome to Student Information System</h1>
+            <p class="lead">Your comprehensive platform for managing student data.</p>
+            <a href="/Students" class="btn btn-primary">View Students</a>
+        </div>
+        <div class="col-md-6">
+            <img src="~/Luftaufnahme 2022.webp" alt="School Aerial View" class="img-fluid rounded shadow">
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">Why Choose Our System</h2>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-user-graduate fa-3x"></i>
+                    </div>
+                    <h3 class="card-title h5">Comprehensive Student Profiles</h3>
+                    <p class="card-text">Keep track of all student information in one place, including academic records,
+                        contact details, and personal information.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-chart-line fa-3x"></i>
+                    </div>
+                    <h3 class="card-title h5">Performance Analytics</h3>
+                    <p class="card-text">Monitor student progress with intuitive analytics and reporting tools that help
+                        identify trends and opportunities.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-shield-alt fa-3x"></i>
+                    </div>
+                    <h3 class="card-title h5">Secure & Reliable</h3>
+                    <p class="card-text">Rest easy knowing that all your data is protected with state-of-the-art
+                        security measures and regular backups.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action Section -->
+<div class="container my-5">
+    <div class="p-5 text-center bg-primary text-white rounded-3">
+        <h2 class="mb-3">Transform Your Educational Management</h2>
+        <p class="mb-4">Join thousands of educational institutions that have streamlined their administrative processes
+            and improved student outcomes with our system.</p>
+        <a href="/Students" class="btn btn-light btn-lg px-4">Get Started Today</a>
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">What Educators Say</h2>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <p class="card-text fst-italic">"This system has revolutionized how we manage student information.
+                        The intuitive interface and comprehensive features have saved our staff countless hours of
+                        administrative work."</p>
+                    <div class="d-flex align-items-center mt-3">
+                        <div>
+                            <p class="fw-bold mb-0">Dr. Sarah Johnson</p>
+                            <p class="text-muted small">Principal, Highland Academy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <p class="card-text fst-italic">"The analytics capabilities have helped us identify at-risk students
+                        early and implement intervention strategies. It's been instrumental in improving our student
+                        success rates."</p>
+                    <div class="d-flex align-items-center mt-3">
+                        <div>
+                            <p class="fw-bold mb-0">Prof. Michael Chen</p>
+                            <p class="text-muted small">Department Head, Westfield College</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
