@@ -10,7 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.2" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="Supabase" Version="1.1.1" />
     <PackageReference Include="supabase-csharp" Version="0.16.2" />
+    <PackageReference Include="Supabase.Postgrest" Version="4.1.0" />
   </ItemGroup>
 
 </Project>

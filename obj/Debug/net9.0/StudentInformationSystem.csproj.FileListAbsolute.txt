@@ -103,9 +103,7 @@
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/nezrqnk58p-muycvpuwrr.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/v0zgfp0y55-87fc7y1x7t.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/yfc7ypekbg-mlv21k5csn.gz
-/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/ljv5q7nx75-b9sayid5wm.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/mj6a3rhqy1-61n19gt1b8.gz
-/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/m6gli0pot7-xtxxf3hu2r.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/n2r6zlv7v2-bqjiyaj88i.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/gfjpmltyur-c2jlpeoesf.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/0pegj3e4yl-erw9l3u2r3.gz
@@ -182,3 +180,7 @@
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.pdb
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.genruntimeconfig.cache
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/ref/StudentInformationSystem.dll
+/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.sourcelink.json
+/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.IO.RecyclableMemoryStream.dll
+/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/ljv5q7nx75-w76wzxgakr.gz
+/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/m6gli0pot7-fr7q2aak1r.gz

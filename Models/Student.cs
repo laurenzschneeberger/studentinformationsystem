@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using Postgrest.Attributes;
-using Postgrest.Models;
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace StudentInformationSystem.Models;
 
-[Table("students")]
+[Table("Students")]
 public class Student : BaseModel
 {
     [PrimaryKey("id")]
@@ -22,7 +22,6 @@ public class Student : BaseModel
 
     [Column("email")]
     [Required(ErrorMessage = "Email is required")]
-    [EmailAddress(ErrorMessage = "Invalid email address")]
     public string Email { get; set; } = string.Empty;
 
     [Column("enrollment_date")]

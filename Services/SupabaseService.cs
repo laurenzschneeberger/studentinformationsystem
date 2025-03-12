@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using System.Text.Json;
 using System.Text;
+using System.Linq;
 
 namespace StudentInformationSystem.Services
 {
@@ -96,7 +97,7 @@ namespace StudentInformationSystem.Services
             // Test 3: Try to fetch students from Supabase
             try
             {
-                diagnosticResults.AppendLine("Test 3: Querying 'students' table via Supabase client");
+                diagnosticResults.AppendLine("Test 3: Querying 'Students' table via Supabase client");
                 var response = await _supabaseClient.From<Student>().Get();
                 diagnosticResults.AppendLine($"Query successful, found {response.Models.Count} students");
                 if (response.Models.Count > 0)
@@ -132,13 +133,13 @@ namespace StudentInformationSystem.Services
                     await connection.OpenAsync();
                     diagnosticResults.AppendLine("Connection opened successfully");
 
-                    // Check if students table exists
-                    diagnosticResults.AppendLine("Checking if 'students' table exists:");
+                    // Check if Students table exists
+                    diagnosticResults.AppendLine("Checking if 'Students' table exists:");
                     var tableCheckSql = @"
                         SELECT EXISTS (
                             SELECT FROM information_schema.tables 
                             WHERE table_schema = 'public'
-                            AND table_name = 'students'
+                            AND table_name = 'Students'
                         );";
 
                     using var tableCommand = new NpgsqlCommand(tableCheckSql, connection);
@@ -148,7 +149,7 @@ namespace StudentInformationSystem.Services
                     if (tableExists)
                     {
                         // Count students
-                        var countSql = "SELECT COUNT(*) FROM students;";
+                        var countSql = "SELECT COUNT(*) FROM Students;";
                         using var countCommand = new NpgsqlCommand(countSql, connection);
                         var count = Convert.ToInt32(await countCommand.ExecuteScalarAsync());
                         diagnosticResults.AppendLine($"Student count: {count}");
@@ -156,7 +157,7 @@ namespace StudentInformationSystem.Services
                         // Get some students
                         if (count > 0)
                         {
-                            var selectSql = "SELECT id, first_name, last_name, email FROM students LIMIT 3;";
+                            var selectSql = "SELECT id, first_name, last_name, email FROM Students LIMIT 3;";
                             using var selectCommand = new NpgsqlCommand(selectSql, connection);
                             using var reader = await selectCommand.ExecuteReaderAsync();
 
@@ -181,9 +182,9 @@ namespace StudentInformationSystem.Services
                     else
                     {
                         // If the table doesn't exist, try to create it
-                        diagnosticResults.AppendLine("Attempting to create students table...");
+                        diagnosticResults.AppendLine("Attempting to create Students table...");
                         var createTableSql = @"
-                            CREATE TABLE IF NOT EXISTS students (
+                            CREATE TABLE IF NOT EXISTS Students (
                                 id SERIAL PRIMARY KEY,
                                 first_name TEXT NOT NULL,
                                 last_name TEXT NOT NULL,
@@ -241,9 +242,7 @@ namespace StudentInformationSystem.Services
 
                     // Try to delete the test record
                     diagnosticResults.AppendLine("Attempting to delete the test student...");
-                    await _supabaseClient.From<Student>()
-                        .Filter("id", Postgrest.Constants.Operator.Equals, insertedStudent.Id)
-                        .Delete();
+                    await _supabaseClient.From<Student>().Filter("id", Supabase.Postgrest.Constants.Operator.Equals, insertedStudent.Id).Delete();
                     diagnosticResults.AppendLine("Delete command sent. If there are no errors, the deletion was successful.");
                 }
             }
@@ -261,154 +260,44 @@ namespace StudentInformationSystem.Services
 
         public async Task<List<Student>> GetStudentsAsync()
         {
-            var students = new List<Student>();
-
-            // Approach 1: Use Supabase Client
             try
             {
-                _logger.LogInformation("Attempt 1: Fetching students using Supabase client");
                 var response = await _supabaseClient.From<Student>().Get();
-                _logger.LogInformation("Supabase client successful, found {Count} students", response.Models.Count);
-                if (response.Models.Count > 0)
-                {
-                    return response.Models;
-                }
+                return response.Models;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching students using Supabase client");
+                _logger.LogError(ex, "Error fetching students from Supabase");
+                return new List<Student>();
             }
+        }
 
-            // Approach 2: Use raw SQL through Supabase
+        public async Task<List<Course>> GetCoursesAsync()
+        {
             try
             {
-                _logger.LogInformation("Attempt 2: Fetching students using Supabase raw query");
-                var query = "SELECT * FROM students";
-                var response = await _supabaseClient.Rpc("pgfunction_get_students", new Dictionary<string, object>());
-
-                if (response != null && !string.IsNullOrEmpty(response.Content))
-                {
-                    _logger.LogInformation("Response content: {Content}", response.Content);
-                    try
-                    {
-                        var results = JsonSerializer.Deserialize<List<Student>>(response.Content);
-                        if (results != null && results.Count > 0)
-                        {
-                            _logger.LogInformation("SQL query successful, found {Count} students", results.Count);
-                            return results;
-                        }
-                    }
-                    catch (Exception jsonEx)
-                    {
-                        _logger.LogError(jsonEx, "Error deserializing JSON response");
-                    }
-                }
+                var response = await _supabaseClient.From<Course>().Get();
+                return response.Models;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching students using Supabase SQL query");
+                _logger.LogError(ex, "Error fetching courses from Supabase");
+                return new List<Course>();
             }
+        }
 
-            // Approach 3: Direct database connection
+        public async Task<List<Enrollment>> GetEnrollmentsAsync()
+        {
             try
             {
-                if (!string.IsNullOrEmpty(_connectionString))
-                {
-                    _logger.LogInformation("Attempt 3: Fetching students using direct database connection");
-                    using var connection = new NpgsqlConnection(_connectionString);
-                    await connection.OpenAsync();
-
-                    var query = "SELECT id, first_name, last_name, email, enrollment_date FROM students";
-                    using var command = new NpgsqlCommand(query, connection);
-                    using var reader = await command.ExecuteReaderAsync();
-
-                    while (await reader.ReadAsync())
-                    {
-                        students.Add(new Student
-                        {
-                            Id = reader.GetInt32(0),
-                            FirstName = reader.GetString(1),
-                            LastName = reader.GetString(2),
-                            Email = reader.GetString(3),
-                            EnrollmentDate = reader.GetDateTime(4)
-                        });
-                    }
-
-                    _logger.LogInformation("Direct connection successful, found {Count} students", students.Count);
-                    if (students.Count > 0)
-                    {
-                        return students;
-                    }
-                }
+                var response = await _supabaseClient.From<Enrollment>().Get();
+                return response.Models;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching students using direct database connection");
+                _logger.LogError(ex, "Error fetching enrollments from Supabase");
+                return new List<Enrollment>();
             }
-
-            // Approach 4: Try to create a sample student to verify table exists
-            try
-            {
-                _logger.LogInformation("Attempt 4: Creating a sample student to verify connectivity");
-
-                // First, check if the table exists
-                try
-                {
-                    using var connection = new NpgsqlConnection(_connectionString);
-                    await connection.OpenAsync();
-
-                    // Try to create the table if it doesn't exist
-                    var createTableSql = @"
-                        CREATE TABLE IF NOT EXISTS students (
-                            id SERIAL PRIMARY KEY,
-                            first_name TEXT NOT NULL,
-                            last_name TEXT NOT NULL,
-                            email TEXT NOT NULL,
-                            enrollment_date DATE NOT NULL,
-                            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-                            updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-                        );";
-
-                    using var createCmd = new NpgsqlCommand(createTableSql, connection);
-                    await createCmd.ExecuteNonQueryAsync();
-
-                    // Insert a sample student
-                    var insertSql = @"
-                        INSERT INTO students (first_name, last_name, email, enrollment_date)
-                        VALUES ('Test', 'Student', 'test@example.com', CURRENT_DATE)
-                        RETURNING id, first_name, last_name, email, enrollment_date;";
-
-                    using var insertCmd = new NpgsqlCommand(insertSql, connection);
-                    using var reader = await insertCmd.ExecuteReaderAsync();
-
-                    if (await reader.ReadAsync())
-                    {
-                        var sampleStudent = new Student
-                        {
-                            Id = reader.GetInt32(0),
-                            FirstName = reader.GetString(1),
-                            LastName = reader.GetString(2),
-                            Email = reader.GetString(3),
-                            EnrollmentDate = reader.GetDateTime(4)
-                        };
-
-                        students.Add(sampleStudent);
-                        _logger.LogInformation("Created sample student with ID: {Id}", sampleStudent.Id);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to create and retrieve sample student");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during sample student creation");
-            }
-
-            // Return what we have, even if it's an empty list
-            _logger.LogWarning("All approaches to fetch students failed! Returning {Count} students", students.Count);
-            return students;
         }
 
         public async Task<Student?> GetStudentByIdAsync(int id)
@@ -416,234 +305,103 @@ namespace StudentInformationSystem.Services
             try
             {
                 var response = await _supabaseClient.From<Student>()
-                    .Filter("id", Postgrest.Constants.Operator.Equals, id)
+                    .Filter("id", Supabase.Postgrest.Constants.Operator.Equals, id)
                     .Get();
-                return response.Models.FirstOrDefault();
+
+                if (response?.Models != null && response.Models.Any())
+                {
+                    _logger.LogInformation("Successfully retrieved student with ID {Id}", id);
+                    return response.Models.First();
+                }
+                _logger.LogWarning("No student found with ID {Id}", id);
+                return null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching student with ID: {Id}", id);
-                return null;
+                _logger.LogError(ex, "Error retrieving student with ID {Id} from Supabase", id);
+                throw;
             }
         }
 
         public async Task<Student?> CreateStudentAsync(Student student)
         {
-            _logger.LogInformation("Attempting to create student: {FirstName} {LastName}", student.FirstName, student.LastName);
-
-            // Approach 1: Use Supabase Client
             try
             {
-                student.Id = 0; // Ensure ID is 0 to let the database generate it
-                var response = await _supabaseClient.From<Student>().Insert(student);
-                var createdStudent = response.Models.FirstOrDefault();
-
-                if (createdStudent != null)
+                if (student == null)
                 {
-                    _logger.LogInformation("Successfully created student with ID: {Id} using Supabase client", createdStudent.Id);
+                    _logger.LogError("Attempted to create a null student");
+                    return null;
+                }
+
+                var response = await _supabaseClient.From<Student>().Insert(student);
+                if (response?.Models != null && response.Models.Any())
+                {
+                    var createdStudent = response.Models.First();
+                    _logger.LogInformation("Successfully created student with ID {Id}", createdStudent.Id);
                     return createdStudent;
                 }
-                else
-                {
-                    _logger.LogWarning("Supabase client returned null after student creation");
-                }
+                _logger.LogError("Failed to create student - no response received");
+                return null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating student using Supabase client");
+                _logger.LogError(ex, "Error creating student in Supabase");
+                throw;
             }
-
-            // Approach 2: Use direct database connection
-            try
-            {
-                if (!string.IsNullOrEmpty(_connectionString))
-                {
-                    using var connection = new NpgsqlConnection(_connectionString);
-                    await connection.OpenAsync();
-
-                    var sql = @"
-                        INSERT INTO students (first_name, last_name, email, enrollment_date)
-                        VALUES (@firstName, @lastName, @email, @enrollmentDate)
-                        RETURNING id, first_name, last_name, email, enrollment_date;";
-
-                    using var command = new NpgsqlCommand(sql, connection);
-                    command.Parameters.AddWithValue("firstName", student.FirstName);
-                    command.Parameters.AddWithValue("lastName", student.LastName);
-                    command.Parameters.AddWithValue("email", student.Email);
-                    command.Parameters.AddWithValue("enrollmentDate", student.EnrollmentDate);
-
-                    using var reader = await command.ExecuteReaderAsync();
-
-                    if (await reader.ReadAsync())
-                    {
-                        var createdStudent = new Student
-                        {
-                            Id = reader.GetInt32(0),
-                            FirstName = reader.GetString(1),
-                            LastName = reader.GetString(2),
-                            Email = reader.GetString(3),
-                            EnrollmentDate = reader.GetDateTime(4)
-                        };
-
-                        _logger.LogInformation("Successfully created student with ID: {Id} using direct SQL", createdStudent.Id);
-                        return createdStudent;
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Direct SQL insertion did not return a student record");
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("Cannot use direct SQL - connection string is empty");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating student using direct SQL");
-            }
-
-            return null;
         }
 
         public async Task<Student?> UpdateStudentAsync(Student student)
         {
-            _logger.LogInformation("Attempting to update student with ID: {Id}", student.Id);
-
-            // Approach 1: Use Supabase Client
             try
             {
+                if (student == null || student.Id <= 0)
+                {
+                    _logger.LogError("Attempted to update an invalid student");
+                    return null;
+                }
+
                 var response = await _supabaseClient.From<Student>()
-                    .Filter("id", Postgrest.Constants.Operator.Equals, student.Id)
+                    .Filter("id", Supabase.Postgrest.Constants.Operator.Equals, student.Id)
                     .Update(student);
 
-                var updatedStudent = response.Models.FirstOrDefault();
-
-                if (updatedStudent != null)
+                if (response?.Models != null && response.Models.Any())
                 {
-                    _logger.LogInformation("Successfully updated student with ID: {Id} using Supabase client", updatedStudent.Id);
+                    var updatedStudent = response.Models.First();
+                    _logger.LogInformation("Successfully updated student with ID {Id}", updatedStudent.Id);
                     return updatedStudent;
                 }
-                else
-                {
-                    _logger.LogWarning("Supabase client returned null after student update");
-                }
+                _logger.LogError("Failed to update student - no response received");
+                return null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating student with ID: {Id} using Supabase client", student.Id);
+                _logger.LogError(ex, "Error updating student in Supabase");
+                throw;
             }
-
-            // Approach 2: Use direct database connection
-            try
-            {
-                if (!string.IsNullOrEmpty(_connectionString))
-                {
-                    using var connection = new NpgsqlConnection(_connectionString);
-                    await connection.OpenAsync();
-
-                    var sql = @"
-                        UPDATE students 
-                        SET first_name = @firstName, last_name = @lastName, email = @email, enrollment_date = @enrollmentDate
-                        WHERE id = @id
-                        RETURNING id, first_name, last_name, email, enrollment_date;";
-
-                    using var command = new NpgsqlCommand(sql, connection);
-                    command.Parameters.AddWithValue("id", student.Id);
-                    command.Parameters.AddWithValue("firstName", student.FirstName);
-                    command.Parameters.AddWithValue("lastName", student.LastName);
-                    command.Parameters.AddWithValue("email", student.Email);
-                    command.Parameters.AddWithValue("enrollmentDate", student.EnrollmentDate);
-
-                    using var reader = await command.ExecuteReaderAsync();
-
-                    if (await reader.ReadAsync())
-                    {
-                        var updatedStudent = new Student
-                        {
-                            Id = reader.GetInt32(0),
-                            FirstName = reader.GetString(1),
-                            LastName = reader.GetString(2),
-                            Email = reader.GetString(3),
-                            EnrollmentDate = reader.GetDateTime(4)
-                        };
-
-                        _logger.LogInformation("Successfully updated student with ID: {Id} using direct SQL", updatedStudent.Id);
-                        return updatedStudent;
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Direct SQL update did not return a student record");
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("Cannot use direct SQL - connection string is empty");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating student with ID: {Id} using direct SQL", student.Id);
-            }
-
-            return null;
         }
 
         public async Task<bool> DeleteStudentAsync(int id)
         {
-            _logger.LogInformation("Attempting to delete student with ID: {Id}", id);
-
-            // Approach 1: Use Supabase Client
             try
             {
+                if (id <= 0)
+                {
+                    _logger.LogError("Attempted to delete student with invalid ID {Id}", id);
+                    return false;
+                }
+
                 await _supabaseClient.From<Student>()
-                    .Filter("id", Postgrest.Constants.Operator.Equals, id)
+                    .Filter("id", Supabase.Postgrest.Constants.Operator.Equals, id)
                     .Delete();
 
-                _logger.LogInformation("Successfully deleted student with ID: {Id} using Supabase client", id);
+                _logger.LogInformation("Successfully deleted student with ID {Id}", id);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting student with ID: {Id} using Supabase client", id);
+                _logger.LogError(ex, "Error deleting student from Supabase");
+                throw;
             }
-
-            // Approach 2: Use direct database connection
-            try
-            {
-                if (!string.IsNullOrEmpty(_connectionString))
-                {
-                    using var connection = new NpgsqlConnection(_connectionString);
-                    await connection.OpenAsync();
-
-                    var sql = "DELETE FROM students WHERE id = @id";
-
-                    using var command = new NpgsqlCommand(sql, connection);
-                    command.Parameters.AddWithValue("id", id);
-
-                    var rowsAffected = await command.ExecuteNonQueryAsync();
-
-                    if (rowsAffected > 0)
-                    {
-                        _logger.LogInformation("Successfully deleted student with ID: {Id} using direct SQL", id);
-                        return true;
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Student with ID: {Id} not found for deletion using direct SQL", id);
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("Cannot use direct SQL - connection string is empty");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting student with ID: {Id} using direct SQL", id);
-            }
-
-            return false;
         }
     }
 }

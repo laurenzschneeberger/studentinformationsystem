@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using Postgrest.Attributes;
-using Postgrest.Models;
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace StudentInformationSystem.Models;
 
-[Table("enrollments")]
+[Table("Enrollments")]
 public class Enrollment : BaseModel
 {
     [PrimaryKey("enrollment_id")]

@@ -1,0 +1,193 @@
+@page
+@model StudentInformationSystem.Pages.AnalyticsModel
+@{
+    ViewData["Title"] = "Analytics Dashboard";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Analytics Dashboard</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body" style="height: 450px">
+                    <h5 class="card-title">Cumulative Student Enrollments</h5>
+                    <canvas id="enrollmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Course Format Distribution</h5>
+                    <canvas id="formatChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Students per Course</h5>
+                    <canvas id="courseEnrollmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script>
+        // Parse the JSON data
+        const enrollmentData = @Html.Raw(Model.EnrollmentData ?? "[]");
+        const formatData = @Html.Raw(Model.CourseFormatData ?? "[]");
+        const courseEnrollmentData = @Html.Raw(Model.CourseEnrollmentData ?? "[]");
+
+        // Enrollment Chart
+        new Chart(document.getElementById('enrollmentChart'), {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Cumulative Enrollments',
+                    data: enrollmentData,
+                    borderColor: '#316CF4',
+                    tension: 0.1,
+                    fill: false,
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#316CF4'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        right: 10,
+                        left: 10,
+                        top: 10,
+                        bottom: 20
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            parser: 'YYYY-MM-DD',
+                            unit: 'month',
+                            displayFormats: {
+                                month: 'MMM YYYY'
+                            }
+                        },
+                        title: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'black',
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'black'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Course Format Chart
+        new Chart(document.getElementById('formatChart'), {
+            type: 'doughnut',
+            data: {
+                labels: formatData.map(item => item.format || 'Unknown'),
+                datasets: [{
+                    data: formatData.map(item => item.count),
+                    backgroundColor: [
+                        '#316CF4',    // Blue
+                        '#E8E8E8',    // Light gray
+                        '#4A4A4A'     // Dark gray
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'black',
+                            font: {
+                                size: 12
+                            },
+                            padding: 20
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Course Enrollment Chart
+        new Chart(document.getElementById('courseEnrollmentChart'), {
+            type: 'bar',
+            data: {
+                labels: courseEnrollmentData.map(item => item.courseName),
+                datasets: [{
+                    label: 'Number of Students',
+                    data: courseEnrollmentData.map(item => item.studentCount),
+                    backgroundColor: 'rgb(54, 162, 235)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Students'
+                        },
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Course Name'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+}

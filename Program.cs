@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddSingleton<SupabaseService>();
+builder.Services.AddScoped<SupabaseService>();
 
 var app = builder.Build();
 

@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace StudentInformationSystem.Models;
 
-public class Course
+[Table("Courses")] // Specify the table name as 'Courses'
+public class Course : BaseModel
 {
-    [Key]
+    [PrimaryKey("id")]
     public int CourseId { get; set; }
 
     [Required]
