@@ -1,0 +1,610 @@
+@page
+@model StudentInformationSystem.Pages.Enrollments.IndexModel
+@{
+    ViewData["Title"] = "Enrollments";
+}
+
+<style>
+    /* -------------------------------------------------------
+       Replicated styling from Courses/Index.cshtml for consistency
+       ------------------------------------------------------- */
+    .page-header {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+        border-radius: 15px;
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Include the exact grid texture from Courses/Index */
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.03'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat;
+        background-size: 100px 100px;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: #34495e;
+        font-weight: 300;
+        max-width: 600px;
+    }
+
+    .floating-shapes {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .shape {
+        position: absolute;
+        background: rgba(52, 152, 219, 0.1);
+        border-radius: 50%;
+    }
+
+    .shape-1 {
+        width: 60px;
+        height: 60px;
+        top: 20%;
+        right: 10%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 40px;
+        height: 40px;
+        bottom: 20%;
+        right: 30%;
+        animation: float 9s ease-in-out infinite 1s;
+    }
+
+    /* Match keyframes from Courses/Index */
+    @@keyframes float {
+        0% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(10deg);
+        }
+
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+    }
+
+    /* Card styling */
+    .enrollment-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        background: #fff;
+    }
+
+    .enrollment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h4 {
+        margin: 0;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.4rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    /* Compact table styling */
+    .enrollment-list .card-body {
+        padding: 1rem;
+    }
+
+    .enrollment-list table {
+        margin-bottom: 0;
+    }
+
+    .enrollment-list table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Column spacing - make columns evenly spaced */
+    .enrollment-list table th {
+        width: 25%;
+        /* Four equal columns - CourseName, ECTS, Hours, Instructor */
+    }
+
+    .enrollment-list table td:last-child {
+        text-align: right;
+        padding-right: 1.5rem;
+        /* Add padding to the right of the last column */
+    }
+
+    /* Unenroll button styling - no circle, just the icon */
+    .unenroll-btn {
+        color: #e74c3c;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        padding: 0.25rem;
+        transition: color 0.2s ease;
+    }
+
+    .unenroll-btn:hover {
+        color: #c0392b;
+    }
+
+    /* Make buttons consistent with accent color (#316CF4) */
+    .btn-accent {
+        background-color: #316CF4;
+        color: #fff;
+        border: none;
+    }
+
+    .btn-accent:hover {
+        background-color: #2852c4;
+        color: #fff;
+    }
+
+    /* Add course button with larger plus icon */
+    .add-course-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background-color: #316CF4;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: background-color 0.2s ease;
+    }
+
+    .add-course-btn i {
+        font-size: 1.5rem;
+        /* Larger plus icon */
+    }
+
+    .add-course-btn:hover {
+        background-color: #2852c4;
+    }
+
+    /* Add course modal */
+    #addCourseModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Updated modal styling to match the unenroll modal styling */
+    #addCourseModal .modal-content {
+        background-color: #fff;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        animation: modalFadeIn 0.3s ease;
+    }
+
+    #addCourseModal .modal-header {
+        background: linear-gradient(135deg, #316CF4 0%, #2852c4 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #addCourseModal .modal-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: white;
+        font-size: 1.4rem;
+    }
+
+    #addCourseModal .btn-close {
+        color: white;
+        opacity: 0.8;
+        /* For the X button in the blue header */
+        filter: invert(1) brightness(1.5);
+    }
+
+    #addCourseModal .btn-close:hover {
+        opacity: 1;
+    }
+
+    #addCourseModal .modal-body {
+        padding: 1.5rem;
+        color: #555;
+    }
+
+    #addCourseModal .modal-footer {
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    #addCourseModal .modal-footer button {
+        margin-left: 0.5rem;
+    }
+
+    /* Student selector styling */
+    .student-selector {
+        margin-bottom: 2rem;
+    }
+
+    .student-selector select {
+        border-radius: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 0.75rem 1rem;
+        width: 100%;
+        font-size: 1rem;
+        color: #2c3e50;
+        background-color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+    }
+
+    .student-selector select:focus {
+        outline: none;
+        border-color: #316CF4;
+        box-shadow: 0 4px 15px rgba(49, 108, 244, 0.15);
+    }
+
+    .student-selector label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    /* Delete confirmation dialog styling (from Courses/Index.cshtml) */
+    #unenrollConfirmModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-modal-content {
+        background-color: #fff;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        animation: modalFadeIn 0.3s ease;
+    }
+
+    .delete-modal-header {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .delete-modal-header h4 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.4rem;
+    }
+
+    .delete-modal-body {
+        padding: 1.5rem;
+        color: #555;
+    }
+
+    .delete-modal-footer {
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .delete-modal-footer .btn {
+        margin-left: 0.5rem;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        color: #fff;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+
+        @@keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container">
+    <section class="page-header position-relative mb-5">
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+        </div>
+        <div class="position-relative">
+            <h1 class="page-title">Student Enrollments</h1>
+            <p class="page-subtitle">Manage student enrollments in courses. Select a student to view their enrolled
+                courses and add or remove enrollments.</p>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+    <div class="alert @(Model.StatusMessage.StartsWith("Error") ? "alert-danger" : "alert-success") alert-dismissible fade show"
+        role="alert">
+        @Model.StatusMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+        }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="student-selector">
+        <form method="get">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="SelectedStudentId">Select a Student:</label>
+                    <select id="SelectedStudentId" name="SelectedStudentId" class="form-select"
+                        onchange="this.form.submit()">
+                        <option value="">Select a Student</option>
+                        @foreach (var student in Model.Students)
+                        {
+                            <option value="@student.Id" selected="@(Model.SelectedStudentId == student.Id)">
+                                @student.FirstName @student.LastName
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.SelectedStudentId.HasValue)
+    {
+        <div class="enrollment-card enrollment-list">
+            <div class="card-header">
+                <h4><i class="bi bi-journal-text me-2"></i> Enrolled Courses</h4>
+                <button type="button" class="add-course-btn" onclick="openAddCourseModal()">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                @if (Model.EnrolledCourses.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Course Name</th>
+                                    <th>ECTS</th>
+                                    <th>Hours</th>
+                                    <th>Instructor</th>
+                                    <th></th> <!-- Empty header for the unenroll button column -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var course in Model.EnrolledCourses)
+                                {
+                                    <tr>
+                                        <td>@course.CourseName</td>
+                                        <td>@course.ECTS</td>
+                                        <td>@course.Hours</td>
+                                        <td>@course.Instructor</td>
+                                        <td>
+                                            <!-- Unenroll button - Modified to use data attributes instead of form -->
+                                            <button type="button" class="unenroll-btn" data-student-id="@course.StudentId"
+                                                data-course-id="@course.CourseId" data-course-name="@course.CourseName">
+                                                <i class="bi bi-box-arrow-right"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-0">
+                        This student is not enrolled in any courses yet.
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Add Course Modal -->
+<div id="addCourseModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Add a Course?</h5>
+            <button type="button" class="btn-close" onclick="closeAddCourseModal()"></button>
+        </div>
+        <form method="post" asp-page-handler="AddEnrollment">
+            <div class="modal-body">
+                <p>Select a course to enroll the student:</p>
+                <input type="hidden" name="SelectedStudentId" value="@Model.SelectedStudentId" />
+                <select name="CourseToAddId" class="form-select" required>
+                    <option value="">Select a Course</option>
+                    @if (Model.AvailableCourses != null)
+                    {
+                        @foreach (var course in Model.AvailableCourses)
+                        {
+                            <option value="@course.CourseId">@course.CourseName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAddCourseModal()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Add Enrollment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Unenroll Confirmation Modal -->
+<div id="unenrollConfirmModal">
+    <div class="delete-modal-content">
+        <div class="delete-modal-header">
+            <h4>Confirm Unenrollment</h4>
+        </div>
+        <div class="delete-modal-body">
+            <p>Are you sure you want to unenroll this student from this course? This action cannot be undone.</p>
+        </div>
+        <div class="delete-modal-footer">
+            <button type="button" class="btn btn-secondary" id="unenrollCancelBtn">Cancel</button>
+            <button type="button" class="btn btn-danger" id="unenrollConfirmBtn">Unenroll</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for unenroll submission -->
+<form id="unenrollForm" method="post" asp-page-handler="RemoveEnrollment" style="display: none;">
+    <input id="unenrollStudentId" name="studentId" type="hidden" value="" />
+    <input id="unenrollCourseId" name="courseId" type="hidden" value="" />
+</form>
+
+@section Scripts {
+    <script>
+        function openAddCourseModal() {
+            document.getElementById('addCourseModal').style.display = 'flex';
+        }
+
+        function closeAddCourseModal() {
+            document.getElementById('addCourseModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function (event) {
+            const addModal = document.getElementById('addCourseModal');
+            if (event.target === addModal) {
+                closeAddCourseModal();
+            }
+
+            const unenrollModal = document.getElementById('unenrollConfirmModal');
+            if (event.target === unenrollModal) {
+                unenrollModal.style.display = 'none';
+            }
+        }
+
+        // Setup unenroll confirmation dialog
+        document.addEventListener('DOMContentLoaded', function () {
+            setupUnenrollConfirmation();
+
+            function setupUnenrollConfirmation() {
+                const modal = document.getElementById('unenrollConfirmModal');
+                const unenrollForm = document.getElementById('unenrollForm');
+                const studentIdInput = document.getElementById('unenrollStudentId');
+                const courseIdInput = document.getElementById('unenrollCourseId');
+
+                // Add event listeners to all unenroll buttons
+                const unenrollButtons = document.querySelectorAll('.unenroll-btn');
+                unenrollButtons.forEach(button => {
+                    button.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        const studentId = this.getAttribute('data-student-id');
+                        const courseId = this.getAttribute('data-course-id');
+                        const courseName = this.getAttribute('data-course-name');
+
+                        // Set the values in the hidden form
+                        studentIdInput.value = studentId;
+                        courseIdInput.value = courseId;
+
+                        // Update modal text
+                        const modalBody = modal.querySelector('.delete-modal-body p');
+                        modalBody.textContent = `Are you sure you want to unenroll this student from ${courseName}? This action cannot be undone.`;
+
+                        // Show the modal
+                        modal.style.display = 'flex';
+                    });
+                });
+
+                // Cancel button
+                document.getElementById('unenrollCancelBtn').addEventListener('click', function () {
+                    modal.style.display = 'none';
+                });
+
+                // Confirm button
+                document.getElementById('unenrollConfirmBtn').addEventListener('click', function () {
+                    // Submit the unenroll form
+                    unenrollForm.submit();
+                });
+            }
+        });
+    </script>
+}

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using StudentInformationSystem.Models;
@@ -5,6 +6,7 @@ using StudentInformationSystem.Services;
 
 namespace StudentInformationSystem.Pages.Students;
 
+[Authorize(Roles = "Admin")]
 public class IndexModel : PageModel
 {
     private readonly SupabaseService _supabaseService;
@@ -22,29 +24,21 @@ public class IndexModel : PageModel
     public List<Student> Students { get; set; } = new();
 
     [BindProperty]
-    public Student NewStudent { get; set; } = new Student();
-
-    [BindProperty]
     public Student? EditingStudent { get; set; }
 
-    // Error message for display in the view
     public string? ErrorMessage { get; set; }
-
-    // For diagnostic results
     public string? DiagnosticResults { get; set; }
 
     public async Task OnGetAsync()
     {
         try
         {
-            _logger.LogInformation("Attempting to fetch all students from the database");
+            _logger.LogInformation("Fetching all students");
             Students = await _supabaseService.GetStudentsAsync();
-            _logger.LogInformation("Successfully retrieved {Count} students", Students.Count);
-
             if (Students.Count == 0)
             {
-                _logger.LogWarning("No students found in the database");
-                ErrorMessage = "No students found in the database. The table might be empty or there may be a connection issue.";
+                ErrorMessage = "No students found in the database.";
+                _logger.LogWarning("No students found.");
             }
         }
         catch (Exception ex)
@@ -59,20 +53,16 @@ public class IndexModel : PageModel
     {
         try
         {
-            _logger.LogInformation("Running Supabase connection diagnostic test");
+            _logger.LogInformation("Running connection diagnostic");
             DiagnosticResults = await _supabaseService.TestConnectionAsync();
-            _logger.LogInformation("Connection test completed");
-
-            // Also attempt to load students while we're here
             Students = await _supabaseService.GetStudentsAsync();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during connection test");
-            DiagnosticResults = $"Error running test: {ex.Message}\n\nStack trace: {ex.StackTrace}";
+            DiagnosticResults = $"Error: {ex.Message}\n\nStack trace: {ex.StackTrace}";
             Students = new List<Student>();
         }
-
         return Page();
     }
 
@@ -80,28 +70,25 @@ public class IndexModel : PageModel
     {
         try
         {
-            if (!ModelState.IsValid)
+            _logger.LogInformation("Adding new student");
+            var createdStudent = await _supabaseService.CreateStudentAsync(new Student
             {
-                Students = await _supabaseService.GetStudentsAsync();
-                return Page();
-            }
-
-            _logger.LogInformation("Adding new student: {FirstName} {LastName}", NewStudent.FirstName, NewStudent.LastName);
-            var createdStudent = await _supabaseService.CreateStudentAsync(NewStudent);
+                FirstName = EditingStudent?.FirstName ?? string.Empty,
+                LastName = EditingStudent?.LastName ?? string.Empty,
+                EnrollmentDate = EditingStudent?.EnrollmentDate ?? DateTime.Now,
+                Email = EditingStudent?.Email ?? string.Empty
+            });
 
             if (createdStudent == null)
             {
                 StatusMessage = "Error: Failed to create student.";
-                _logger.LogWarning("Failed to create student");
             }
             else
             {
-                StatusMessage = $"Student {createdStudent.FirstName} {createdStudent.LastName} created successfully.";
-                _logger.LogInformation("Student created with ID: {Id}", createdStudent.Id);
-                NewStudent = new Student(); // Reset the form
+                StatusMessage = $"Student {createdStudent.FirstName} {createdStudent.LastName} created.";
             }
 
-            // Refresh the student list
+            EditingStudent = null; // Clear form
             Students = await _supabaseService.GetStudentsAsync();
             return Page();
         }
@@ -118,28 +105,31 @@ public class IndexModel : PageModel
     {
         try
         {
-            if (!ModelState.IsValid || EditingStudent == null)
+            if (EditingStudent == null || EditingStudent.Id == 0)
             {
                 Students = await _supabaseService.GetStudentsAsync();
                 return Page();
             }
 
-            _logger.LogInformation("Updating student with ID: {Id}", EditingStudent.Id);
-            var updatedStudent = await _supabaseService.UpdateStudentAsync(EditingStudent);
+            _logger.LogInformation("Updating student ID {Id}", EditingStudent.Id);
 
-            if (updatedStudent == null)
+            // Ensure all properties have valid values
+            EditingStudent.FirstName = EditingStudent.FirstName ?? string.Empty;
+            EditingStudent.LastName = EditingStudent.LastName ?? string.Empty;
+            EditingStudent.Email = EditingStudent.Email ?? string.Empty;
+
+            var updated = await _supabaseService.UpdateStudentAsync(EditingStudent);
+
+            if (updated == null)
             {
                 StatusMessage = "Error: Failed to update student.";
-                _logger.LogWarning("Failed to update student with ID: {Id}", EditingStudent.Id);
             }
             else
             {
-                StatusMessage = $"Student {updatedStudent.FirstName} {updatedStudent.LastName} updated successfully.";
-                _logger.LogInformation("Student updated with ID: {Id}", updatedStudent.Id);
-                EditingStudent = null; // Clear the editing state
+                StatusMessage = $"Student {updated.FirstName} {updated.LastName} updated.";
             }
 
-            // Refresh the student list
+            EditingStudent = null; // Clear after update
             Students = await _supabaseService.GetStudentsAsync();
             return Page();
         }
@@ -158,27 +148,24 @@ public class IndexModel : PageModel
         {
             if (EditingStudent == null || EditingStudent.Id == 0)
             {
-                StatusMessage = "Error: No student selected for deletion.";
+                StatusMessage = "Error: No student selected.";
                 Students = await _supabaseService.GetStudentsAsync();
                 return Page();
             }
 
-            _logger.LogInformation("Deleting student with ID: {Id}", EditingStudent.Id);
+            _logger.LogInformation("Deleting student ID {Id}", EditingStudent.Id);
             var result = await _supabaseService.DeleteStudentAsync(EditingStudent.Id);
 
-            if (result)
+            if (!result)
             {
-                StatusMessage = "Student deleted successfully.";
-                _logger.LogInformation("Student deleted with ID: {Id}", EditingStudent.Id);
-                EditingStudent = null; // Clear the editing state
+                StatusMessage = "Error: Failed to delete student.";
             }
             else
             {
-                StatusMessage = "Error: Failed to delete student.";
-                _logger.LogWarning("Failed to delete student with ID: {Id}", EditingStudent.Id);
+                StatusMessage = "Student deleted successfully.";
             }
 
-            // Refresh the student list
+            EditingStudent = null; // Clear after deletion
             Students = await _supabaseService.GetStudentsAsync();
             return Page();
         }
@@ -195,20 +182,13 @@ public class IndexModel : PageModel
     {
         try
         {
-            _logger.LogInformation("Selecting student with ID: {Id}", id);
-            EditingStudent = await _supabaseService.GetStudentByIdAsync(id);
-
-            if (EditingStudent == null)
+            _logger.LogInformation("Selecting student ID {Id}", id);
+            var student = await _supabaseService.GetStudentByIdAsync(id);
+            if (student == null)
             {
                 StatusMessage = "Error: Student not found.";
-                _logger.LogWarning("Student with ID {Id} not found for selection", id);
             }
-            else
-            {
-                _logger.LogInformation("Selected student with ID: {Id}", id);
-            }
-
-            // Refresh the student list
+            EditingStudent = student;
             Students = await _supabaseService.GetStudentsAsync();
             return Page();
         }

@@ -1,0 +1,103 @@
+@page
+@model StudentInformationSystem.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<style>
+    .login-container {
+        max-width: 450px;
+        margin: 0 auto;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        background: #fff;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-header h1 {
+        font-size: 2.5rem;
+        color: #316CF4;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+        color: #6c757d;
+    }
+
+    .form-floating {
+        margin-bottom: 1rem;
+    }
+
+    .form-floating>label {
+        color: #a0a0a0;
+    }
+
+    .btn-login {
+        background-color: #316CF4;
+        border-color: #316CF4;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .btn-login:hover {
+        background-color: #2658d8;
+        border-color: #2658d8;
+    }
+
+    .btn-create-account {
+        background-color: #ffffff;
+        border: 1px solid #000000;
+        color: #000000;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-top: 1rem;
+    }
+
+    .btn-create-account:hover {
+        background-color: #f8f9fa;
+    }
+
+    .error-message {
+        color: #dc3545;
+        margin-top: 1rem;
+        text-align: center;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-header">
+        <h1>SIS Login</h1>
+        <p>Enter your credentials to access the system</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <form method="post">
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="username" name="Username" placeholder=" " required>
+            <label for="username">Username</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="password" name="Password" placeholder=" " required>
+            <label for="password">Password</label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-login">Sign In</button>
+    </form>
+
+    <a asp-page="/CreateAccount" class="btn btn-create-account">Create Account</a>
+</div>

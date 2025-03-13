@@ -143,7 +143,8 @@ namespace StudentInformationSystem.Services
                         );";
 
                     using var tableCommand = new NpgsqlCommand(tableCheckSql, connection);
-                    var tableExists = (bool)await tableCommand.ExecuteScalarAsync();
+                    var tableExistsObj = await tableCommand.ExecuteScalarAsync();
+                    var tableExists = tableExistsObj != null && (bool)tableExistsObj;
                     diagnosticResults.AppendLine($"Students table exists: {tableExists}");
 
                     if (tableExists)
@@ -151,7 +152,8 @@ namespace StudentInformationSystem.Services
                         // Count students
                         var countSql = "SELECT COUNT(*) FROM Students;";
                         using var countCommand = new NpgsqlCommand(countSql, connection);
-                        var count = Convert.ToInt32(await countCommand.ExecuteScalarAsync());
+                        var countObj = await countCommand.ExecuteScalarAsync();
+                        var count = countObj != null ? Convert.ToInt32(countObj) : 0;
                         diagnosticResults.AppendLine($"Student count: {count}");
 
                         // Get some students
@@ -166,10 +168,10 @@ namespace StudentInformationSystem.Services
                             while (await reader.ReadAsync())
                             {
                                 studentNum++;
-                                var id = reader.GetInt32(0);
-                                var firstName = reader.GetString(1);
-                                var lastName = reader.GetString(2);
-                                var email = reader.GetString(3);
+                                var id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
+                                var firstName = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                                var lastName = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                                var email = reader.IsDBNull(3) ? "" : reader.GetString(3);
                                 diagnosticResults.AppendLine($"ID: {id}, Name: {firstName} {lastName}, Email: {email}");
                             }
 
@@ -199,7 +201,8 @@ namespace StudentInformationSystem.Services
                         diagnosticResults.AppendLine("Table creation command executed. Checking if table exists now...");
 
                         using var recheckCommand = new NpgsqlCommand(tableCheckSql, connection);
-                        tableExists = (bool)await recheckCommand.ExecuteScalarAsync();
+                        tableExistsObj = await recheckCommand.ExecuteScalarAsync();
+                        tableExists = tableExistsObj != null && (bool)tableExistsObj;
                         diagnosticResults.AppendLine($"Students table exists after creation attempt: {tableExists}");
                     }
                 }
@@ -232,18 +235,25 @@ namespace StudentInformationSystem.Services
                 };
 
                 var response = await _supabaseClient.From<Student>().Insert(testStudent);
-                bool success = response != null && response.Models.Count > 0;
+                bool success = response != null && response.Models != null && response.Models.Count > 0;
 
                 diagnosticResults.AppendLine($"Insert test successful: {success}");
-                if (success)
+                if (success && response?.Models != null && response.Models.Count > 0)
                 {
                     var insertedStudent = response.Models[0];
-                    diagnosticResults.AppendLine($"Inserted student ID: {insertedStudent.Id}, Name: {insertedStudent.FirstName} {insertedStudent.LastName}");
+                    if (insertedStudent != null)
+                    {
+                        diagnosticResults.AppendLine($"Inserted student ID: {insertedStudent.Id}, Name: {insertedStudent.FirstName} {insertedStudent.LastName}");
 
-                    // Try to delete the test record
-                    diagnosticResults.AppendLine("Attempting to delete the test student...");
-                    await _supabaseClient.From<Student>().Filter("id", Supabase.Postgrest.Constants.Operator.Equals, insertedStudent.Id).Delete();
-                    diagnosticResults.AppendLine("Delete command sent. If there are no errors, the deletion was successful.");
+                        // Try to delete the test record
+                        diagnosticResults.AppendLine("Attempting to delete the test student...");
+                        await _supabaseClient.From<Student>().Filter("id", Supabase.Postgrest.Constants.Operator.Equals, insertedStudent.Id).Delete();
+                        diagnosticResults.AppendLine("Delete command sent. If there are no errors, the deletion was successful.");
+                    }
+                    else
+                    {
+                        diagnosticResults.AppendLine("Inserted student was null even though response contained models.");
+                    }
                 }
             }
             catch (Exception ex)
@@ -276,8 +286,28 @@ namespace StudentInformationSystem.Services
         {
             try
             {
-                var response = await _supabaseClient.From<Course>().Get();
-                return response.Models;
+                _logger.LogInformation("Fetching courses from Supabase");
+                // Use the DTO for database operations
+                var response = await _supabaseClient.From<CourseDto>().Get();
+
+                // Convert DTOs to Course models
+                var courses = response.Models.Select(dto => dto.ToCourse()).ToList();
+
+                // Add diagnostic logging to check courses data
+                if (courses.Count > 0)
+                {
+                    foreach (var course in courses.Take(3))
+                    {
+                        _logger.LogInformation("Fetched course: ID {Id}, Name: {Name}, ECTS: {ECTS}, Format: {Format}",
+                            course.CourseId, course.CourseName, course.ECTS, course.Format);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("No courses found in Supabase response");
+                }
+
+                return courses;
             }
             catch (Exception ex)
             {
@@ -297,6 +327,116 @@ namespace StudentInformationSystem.Services
             {
                 _logger.LogError(ex, "Error fetching enrollments from Supabase");
                 return new List<Enrollment>();
+            }
+        }
+
+        public async Task<List<Enrollment>> GetEnrollmentsForStudentAsync(int studentId)
+        {
+            try
+            {
+                var response = await _supabaseClient.From<Enrollment>()
+                    .Filter("student_id", Supabase.Postgrest.Constants.Operator.Equals, studentId)
+                    .Get();
+                return response.Models;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching enrollments for student {StudentId} from Supabase", studentId);
+                return new List<Enrollment>();
+            }
+        }
+
+        public async Task<Enrollment?> AddEnrollmentAsync(int studentId, int courseId)
+        {
+            try
+            {
+                var enrollment = new Enrollment
+                {
+                    StudentId = studentId,
+                    CourseId = courseId,
+                    EnrollmentDate = DateTime.Now
+                };
+
+                var response = await _supabaseClient.From<Enrollment>().Insert(enrollment);
+                if (response?.Models != null && response.Models.Any())
+                {
+                    var createdEnrollment = response.Models.First();
+                    _logger.LogInformation("Successfully created enrollment for student {StudentId} in course {CourseId}",
+                        studentId, courseId);
+                    return createdEnrollment;
+                }
+                _logger.LogError("Failed to create enrollment - no response received");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating enrollment in Supabase");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteEnrollmentAsync(int enrollmentId)
+        {
+            try
+            {
+                await _supabaseClient.From<Enrollment>()
+                    .Filter("enrollment_id", Supabase.Postgrest.Constants.Operator.Equals, enrollmentId)
+                    .Delete();
+
+                _logger.LogInformation("Successfully deleted enrollment with ID {EnrollmentId}", enrollmentId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting enrollment with ID {EnrollmentId} from Supabase", enrollmentId);
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteEnrollmentByStudentAndCourseAsync(int studentId, int courseId)
+        {
+            try
+            {
+                var enrollments = await _supabaseClient.From<Enrollment>()
+                    .Filter("student_id", Supabase.Postgrest.Constants.Operator.Equals, studentId)
+                    .Filter("course_id", Supabase.Postgrest.Constants.Operator.Equals, courseId)
+                    .Get();
+
+                if (enrollments?.Models != null && enrollments.Models.Any())
+                {
+                    var enrollmentToDelete = enrollments.Models.First();
+                    await _supabaseClient.From<Enrollment>()
+                        .Filter("enrollment_id", Supabase.Postgrest.Constants.Operator.Equals, enrollmentToDelete.EnrollmentId)
+                        .Delete();
+
+                    _logger.LogInformation("Successfully deleted enrollment for student {StudentId} in course {CourseId}",
+                        studentId, courseId);
+                    return true;
+                }
+
+                _logger.LogWarning("No enrollment found for student {StudentId} in course {CourseId} to delete",
+                    studentId, courseId);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting enrollment for student {StudentId} in course {CourseId} from Supabase",
+                    studentId, courseId);
+                throw;
+            }
+        }
+
+        public async Task<List<EnrollmentSummary>> GetEnrollmentsSummaryAsync()
+        {
+            try
+            {
+                var response = await _supabaseClient.From<EnrollmentSummary>().Get();
+                return response.Models;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching enrollments summary from Supabase");
+                return new List<EnrollmentSummary>();
             }
         }
 
@@ -401,6 +541,160 @@ namespace StudentInformationSystem.Services
             {
                 _logger.LogError(ex, "Error deleting student from Supabase");
                 throw;
+            }
+        }
+
+        // Course-specific methods
+        public async Task<Course?> GetCourseByIdAsync(int id)
+        {
+            try
+            {
+                var response = await _supabaseClient.From<CourseDto>()
+                    .Filter("course_id", Supabase.Postgrest.Constants.Operator.Equals, id)
+                    .Get();
+
+                if (response?.Models != null && response.Models.Any())
+                {
+                    _logger.LogInformation("Successfully retrieved course with ID {Id}", id);
+                    return response.Models.First().ToCourse();
+                }
+                _logger.LogWarning("No course found with ID {Id}", id);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving course with ID {Id} from Supabase", id);
+                throw;
+            }
+        }
+
+        public async Task<Course?> CreateCourseAsync(Course course)
+        {
+            try
+            {
+                if (course == null)
+                {
+                    _logger.LogError("Attempted to create a null course");
+                    return null;
+                }
+
+                // Validate the course name specifically
+                if (string.IsNullOrWhiteSpace(course.CourseName))
+                {
+                    _logger.LogError("Attempted to create a course with no name");
+                    return null;
+                }
+
+                // Convert to DTO for database operations
+                var courseDto = CourseDto.FromCourse(course);
+
+                _logger.LogInformation("Creating new course with name: {CourseName}", courseDto.CourseName);
+                var response = await _supabaseClient.From<CourseDto>().Insert(courseDto);
+                if (response?.Models != null && response.Models.Any())
+                {
+                    var createdCourseDto = response.Models.First();
+                    var createdCourse = createdCourseDto.ToCourse();
+                    _logger.LogInformation("Successfully created course with ID {Id} and name {Name}",
+                        createdCourse.CourseId, createdCourse.CourseName);
+                    return createdCourse;
+                }
+                _logger.LogError("Failed to create course - no response received");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating course in Supabase");
+                throw;
+            }
+        }
+
+        public async Task<Course?> UpdateCourseAsync(Course course)
+        {
+            try
+            {
+                if (course == null || course.CourseId <= 0)
+                {
+                    _logger.LogError("Attempted to update an invalid course");
+                    return null;
+                }
+
+                // Validate the course name specifically
+                if (string.IsNullOrWhiteSpace(course.CourseName))
+                {
+                    _logger.LogError("Attempted to update a course with no name");
+                    return null;
+                }
+
+                // Convert to DTO for database operations
+                var courseDto = CourseDto.FromCourse(course);
+
+                _logger.LogInformation("Updating course ID {Id} with name: {CourseName}",
+                    courseDto.CourseId, courseDto.CourseName);
+
+                var response = await _supabaseClient.From<CourseDto>()
+                    .Filter("course_id", Supabase.Postgrest.Constants.Operator.Equals, courseDto.CourseId)
+                    .Update(courseDto);
+
+                if (response?.Models != null && response.Models.Any())
+                {
+                    var updatedCourseDto = response.Models.First();
+                    var updatedCourse = updatedCourseDto.ToCourse();
+                    _logger.LogInformation("Successfully updated course with ID {Id} and name {Name}",
+                        updatedCourse.CourseId, updatedCourse.CourseName);
+                    return updatedCourse;
+                }
+                _logger.LogError("Failed to update course - no response received");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating course in Supabase");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteCourseAsync(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    _logger.LogError("Attempted to delete course with invalid ID {Id}", id);
+                    return false;
+                }
+
+                await _supabaseClient.From<CourseDto>()
+                    .Filter("course_id", Supabase.Postgrest.Constants.Operator.Equals, id)
+                    .Delete();
+
+                _logger.LogInformation("Successfully deleted course with ID {Id}", id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting course from Supabase");
+                throw;
+            }
+        }
+
+        public async Task<string> ExecuteDiagnosticSqlAsync(string sql)
+        {
+            try
+            {
+                _logger.LogInformation("Executing diagnostic SQL: {Sql}", sql);
+                var response = await _supabaseClient.Rpc("execute_sql", new System.Collections.Generic.Dictionary<string, object> { { "query", sql } });
+
+                if (response != null)
+                {
+                    return response.Content;
+                }
+
+                return "No response from SQL execution";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing diagnostic SQL");
+                return $"Error: {ex.Message}";
             }
         }
     }

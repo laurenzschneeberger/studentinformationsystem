@@ -1,0 +1,20 @@
+[
+  {
+    "Username": "yoswag",
+    "Password": "swagger",
+    "Role": "Student",
+    "Created": "2025-03-13T09:19:07.935691+01:00"
+  },
+  {
+    "Username": "Hello",
+    "Password": "swagger",
+    "Role": "Admin",
+    "Created": "2025-03-13T09:24:56.998086+01:00"
+  },
+  {
+    "Username": "Satine ",
+    "Password": "lauriiscool",
+    "Role": "Admin",
+    "Created": "2025-03-13T09:41:24.878525+01:00"
+  }
+]

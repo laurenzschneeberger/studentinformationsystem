@@ -7,8 +7,6 @@
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/StudentInformationSystem.runtimeconfig.json
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/StudentInformationSystem.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/StudentInformationSystem.pdb
-/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Functions.dll
-/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Gotrue.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.AspNetCore.Identity.UI.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.EntityFrameworkCore.dll
@@ -18,13 +16,16 @@
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.IdentityModel.Logging.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
+/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.IO.RecyclableMemoryStream.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/MimeMapping.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Newtonsoft.Json.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Npgsql.dll
+/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.dll
+/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Core.dll
+/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Functions.dll
+/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Gotrue.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Postgrest.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Realtime.dll
-/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Core.dll
-/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Supabase.Storage.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll
 /Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/System.Reactive.dll
@@ -38,6 +39,7 @@
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.MvcApplicationPartsAssemblyInfo.cache
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.RazorAssemblyInfo.cache
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.RazorAssemblyInfo.cs
+/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.sourcelink.json
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/scopedcss/Pages/Shared/_Layout.cshtml.rz.scp.css
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/scopedcss/bundle/StudentInformationSystem.styles.css
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/scopedcss/projectbundle/StudentInformationSystem.bundle.scp.css
@@ -104,6 +106,7 @@
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/v0zgfp0y55-87fc7y1x7t.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/yfc7ypekbg-mlv21k5csn.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/mj6a3rhqy1-61n19gt1b8.gz
+/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/m6gli0pot7-fr7q2aak1r.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/n2r6zlv7v2-bqjiyaj88i.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/gfjpmltyur-c2jlpeoesf.gz
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/0pegj3e4yl-erw9l3u2r3.gz
@@ -180,7 +183,5 @@
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.pdb
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.genruntimeconfig.cache
 /Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/ref/StudentInformationSystem.dll
-/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/StudentInformationSystem.sourcelink.json
-/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/Microsoft.IO.RecyclableMemoryStream.dll
-/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/ljv5q7nx75-w76wzxgakr.gz
-/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/m6gli0pot7-fr7q2aak1r.gz
+/Users/laurenzschneeberger/StudentInformationSystem/obj/Debug/net9.0/compressed/ljv5q7nx75-6rxrbpe39b.gz
+/Users/laurenzschneeberger/StudentInformationSystem/bin/Debug/net9.0/user_accounts.json

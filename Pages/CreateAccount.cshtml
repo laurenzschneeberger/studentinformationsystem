@@ -1,0 +1,223 @@
+@page
+@model StudentInformationSystem.Pages.CreateAccountModel
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<style>
+    .login-container {
+        max-width: 450px;
+        margin: 0 auto;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        background: #fff;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-header h1 {
+        font-size: 2.5rem;
+        color: #316CF4;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+        color: #6c757d;
+    }
+
+    .form-floating {
+        margin-bottom: 1rem;
+    }
+
+    .form-floating>label {
+        color: #a0a0a0;
+    }
+
+    .btn-create {
+        background-color: #316CF4;
+        border-color: #316CF4;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .btn-create:hover {
+        background-color: #2658d8;
+        border-color: #2658d8;
+    }
+
+    .error-message {
+        color: #dc3545;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .success-message {
+        color: #28a745;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    /* Toggle switch styles */
+    .role-toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding: 0 0.25rem;
+    }
+
+    .role-label {
+        font-weight: 500;
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked+.slider {
+        background-color: #316CF4;
+    }
+
+    input:focus+.slider {
+        box-shadow: 0 0 1px #316CF4;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(30px);
+    }
+
+    .role-text {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    .text-primary {
+        color: #316CF4 !important;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-header">
+        <h1>Create Account</h1>
+        <p>Register to access the student information system</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @Model.SuccessMessage
+        </div>
+    }
+
+    <form method="post">
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="username" name="Username" placeholder=" " required>
+            <label for="username">Username</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="password" name="Password" placeholder=" " required>
+            <label for="password">Password</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="confirmPassword" name="ConfirmPassword" placeholder=" "
+                required>
+            <label for="confirmPassword">Confirm Password</label>
+        </div>
+
+        <div class="role-toggle-container">
+            <div>
+                <p class="role-label">User Role</p>
+                <small id="studentText"
+                    class="role-text @(!Model.IsAdmin ? "text-primary" : "text-muted")">Student</small> /
+                <small id="adminText" class="role-text @(Model.IsAdmin ? "text-primary" : "text-muted")">Admin</small>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="roleToggle" asp-for="IsAdmin">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-create">Create Account</button>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleSwitch = document.getElementById('roleToggle');
+            const studentText = document.getElementById('studentText');
+            const adminText = document.getElementById('adminText');
+
+            // Set initial state
+            updateTextColors(toggleSwitch.checked);
+
+            // Add event listener for toggle changes
+            toggleSwitch.addEventListener('change', function () {
+                updateTextColors(this.checked);
+            });
+
+            function updateTextColors(isAdmin) {
+                if (isAdmin) {
+                    studentText.className = 'role-text text-muted';
+                    adminText.className = 'role-text text-primary';
+                } else {
+                    studentText.className = 'role-text text-primary';
+                    adminText.className = 'role-text text-muted';
+                }
+            }
+        });
+    </script>
+}

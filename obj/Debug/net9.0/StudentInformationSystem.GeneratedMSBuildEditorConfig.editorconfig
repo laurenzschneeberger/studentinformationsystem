@@ -24,12 +24,36 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQW5hbHl0aWNzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/laurenzschneeberger/StudentInformationSystem/Pages/Courses/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ291cnNlcy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/laurenzschneeberger/StudentInformationSystem/Pages/CreateAccount.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3JlYXRlQWNjb3VudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/laurenzschneeberger/StudentInformationSystem/Pages/Enrollments/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvRW5yb2xsbWVudHMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/laurenzschneeberger/StudentInformationSystem/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/laurenzschneeberger/StudentInformationSystem/Pages/Help.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvSGVscC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/laurenzschneeberger/StudentInformationSystem/Pages/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/laurenzschneeberger/StudentInformationSystem/Pages/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvTG9naW4uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/laurenzschneeberger/StudentInformationSystem/Pages/Logout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvTG9nb3V0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/laurenzschneeberger/StudentInformationSystem/Pages/Privacy.cshtml]

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using StudentInformationSystem.Models;
 using StudentInformationSystem.Services;
@@ -5,6 +6,7 @@ using System.Text.Json;
 
 namespace StudentInformationSystem.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class AnalyticsModel : PageModel
     {
         private readonly SupabaseService _supabaseService;
@@ -52,30 +54,15 @@ namespace StudentInformationSystem.Pages
                     })
                     .ToList();
 
-                // Get enrollments per course
-                var enrollments = await _supabaseService.GetEnrollmentsAsync();
-                var courseEnrollments = enrollments
-                    .GroupBy(e => e.CourseId)
-                    .Select(g => new
+                // Get enrollments summary from the view
+                var enrollmentsSummary = await _supabaseService.GetEnrollmentsSummaryAsync();
+                var courseEnrollmentData = enrollmentsSummary
+                    .OrderByDescending(x => x.Enrollments)
+                    .Select(x => new
                     {
-                        CourseId = g.Key,
-                        StudentCount = g.Select(e => e.StudentId).Distinct().Count()
+                        courseName = x.CourseName,
+                        studentCount = x.Enrollments
                     })
-                    .ToList();
-
-                // Join with courses to get course names
-                var courseEnrollmentData = courseEnrollments
-                    .Join(
-                        courses,
-                        e => e.CourseId,
-                        c => c.CourseId,
-                        (e, c) => new
-                        {
-                            courseName = c.CourseName,
-                            studentCount = e.StudentCount
-                        }
-                    )
-                    .OrderByDescending(x => x.studentCount)
                     .ToList();
 
                 EnrollmentData = JsonSerializer.Serialize(cumulativeData);
