@@ -1,7 +1,14 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using StudentInformationSystem.Services;
+using DotEnv.Net;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Load environment variables from .env file in development
+if (builder.Environment.IsDevelopment())
+{
+    DotEnv.Load();
+}
 
 // Add services to the container.
 builder.Services.AddRazorPages();
